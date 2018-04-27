@@ -8,34 +8,37 @@ def nothing(x):
 
 device = cv2.VideoCapture(0)
 
-cv2.namedWindow("Frame")
+cv2.namedWindow("trackbars")
 
-cv2.createTrackbar("Blue", "Frame", 0, 179, nothing)
-cv2.createTrackbar("color/gray", "Frame", 0, 1, nothing)
+# TrackBars to select the color we want to detect
+
+cv2.createTrackbar("L - H", "trackbars", 0, 179, nothing)
+cv2.createTrackbar("L - S", "trackbars", 0, 255, nothing)
+cv2.createTrackbar("L - V", "trackbars", 0, 255, nothing)
+cv2.createTrackbar("U - H", "trackbars", 179, 179, nothing)
+cv2.createTrackbar("U - S", "trackbars", 255, 255, nothing)
+cv2.createTrackbar("U - V", "trackbars", 255, 255, nothing)
+
 while True:
     ret, frame = device.read()
+    hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
-    test = cv2.getTrackbarPos("Blue", "Frame")
+    l_h = cv2.getTrackbarPos("L - H", "trackbars")
+    l_s = cv2.getTrackbarPos("L - S", "trackbars")
+    l_v = cv2.getTrackbarPos("L - V", "trackbars")
+    u_h = cv2.getTrackbarPos("U - H", "trackbars")
+    u_s = cv2.getTrackbarPos("U - S", "trackbars")
+    u_v = cv2.getTrackbarPos("U - V", "trackbars")
 
-    font = cv2.FONT_HERSHEY_COMPLEX
-    cv2.putText(frame, str(test), (50, 150), font, 4, (0, 0, 255))
+    lower_range = np.array([l_h, l_s, l_v])
+    upper_range = np.array([u_h, u_s, u_v])
 
-    s= cv2.getTrackbarPos("color/gray", "Frame")
-    if s == 0:
-        pass
-    else:
-        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    # hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-
-    # lower_range = np.array([134, 0, 0])
-    # upper_range = np.array([134, 200, 200])
-
-    # mask = cv2.inRange(hsv, lower_range, upper_range)
+    mask = cv2.inRange(hsv, lower_range, upper_range)
 
     cv2.imshow("Frame", frame)
 
-    # result = cv2.bitwise_and(frame, frame, mask=mask)
-    # cv2.imshow("Result", result)
+    result = cv2.bitwise_and(frame, frame, mask=mask)
+    cv2.imshow("Result", result)
 
     key = cv2.waitKey(1)
 
